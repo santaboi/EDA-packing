@@ -31,7 +31,9 @@ ifstream infile;
 
 void inorder(Module*);//horse
 void visit(Module*);//operation
-void printName(Module*);//for testing use 
+void inorder_X(Module*);
+void create_x(Module*); 
+void printName(Module*);//for testing use
 void moveOn();
 
 int main()
@@ -57,13 +59,7 @@ int main()
         tempe=benchmark+testcase;
         nodespath=tempe+".nodes";
         cout<<nodespath<<endl;
-        /*
-        tempe=".\\\\"+benchmark;
-        benchmark=tempe+"\\\\";
-        tempe=benchmark+testcase;
-        nodespath=tempe+".nodes";
-        cout<<nodespath<<endl;
-        */
+        
         infile.open(nodespath,ios::in);
         
     //t---------build Btree of nodes-----------------------------------------------
@@ -130,14 +126,16 @@ int main()
                         r_status=1;
                         //右有指成功
                         //right child x cursor initialized*****************************************
-                        input_list[i].x=input_list[j].x;
+                        //create_x取代
+                        //input_list[i].x=input_list[j].x;
                     }
                     if(strcmp(input_list[j].l_name,input_list[i].name)==0)
                     {   input_list[j].leftPtr=&input_list[i];
                         l_status=1;
                         //左有指成功
                         //left child x cursor initialized*******************************************
-                        input_list[i].x=input_list[j].x+input_list[j].width;
+                        //create_x 取代
+                        //input_list[i].x=input_list[j].x+input_list[j].width;
                     }  
                 }
                 
@@ -147,6 +145,9 @@ int main()
                 r_status=0;
                 l_status=0;
             }
+            
+
+            inorder_X(&input_list[0]);
 
 
     //t-----------------------------contour build--------------------------------
@@ -172,7 +173,6 @@ int main()
     //b-----------------------------contour build--------------------------------
 
         //5/28 output (.m)
-        cout<<"success3";
         ofstream outfile ("test.m");
             outfile<<"axis equal;"<<endl;
             outfile<<"hold on"<<endl;
@@ -203,12 +203,18 @@ int main()
             }
             
             y_max=x_max=0;//initialized
+            for(int i=0;i<nodes_num;i++)
+            {block_x[i].clear();
+            block_y[i].clear();
+            block_name.clear();}
             infile.close();
             outfile.close();
             testcase=testcase+".m";
             const char* newname=testcase.c_str();
             if(rename("test.m",newname)!=0)
             cout<<"rename file error!\n";
+
+            
 
         }
     }
@@ -270,6 +276,7 @@ void inorder(Module* currentNode)
     if(currentNode)
     {  
     visit(currentNode);
+    printName(currentNode);
     inorder(currentNode->leftPtr);
     inorder(currentNode->rightPtr);
     }
@@ -530,7 +537,7 @@ void visit(Module*curM)//operation
             }
         }  
     }  
-    cout<<"aaaaa"<<endl;
+    
     tourList.currentToFirst();
     
     //build blockxy  name
@@ -552,6 +559,7 @@ void visit(Module*curM)//operation
     block_name.push_back(stringname);
     block_index++;
     
+   
     if((curM->y+curM->height)>y_max) y_max=curM->y+curM->height;
     if((curM->x+curM->width)>x_max) x_max=curM->x+curM->width;
     //leftest rightest 要變回null
@@ -582,7 +590,27 @@ void printName(Module*a)
     //cout<<a->name<<endl;
     cout<<"left x cursor"<<a->x<<endl;
     cout<<"modified Y cursor"<<a->y<<endl;
+    cout<<"leftname"<<a->l_name;
+    cout<<"rightname"<<a->r_name<<endl;
 }
+
+void create_x(Module* now)
+{
+    if(now->leftPtr!=NULL) now->leftPtr->x=now->x+now->width;
+    if(now->rightPtr!=NULL) now->rightPtr->x=now->x;
+}
+
+
+void inorder_X(Module*currentNode)
+{
+    if(currentNode)
+    {  
+    create_x(currentNode);
+    inorder_X(currentNode->leftPtr);
+    inorder_X(currentNode->rightPtr);
+    }
+}
+
 
 
 
