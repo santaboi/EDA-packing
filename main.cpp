@@ -13,10 +13,12 @@ int cases=0;
 int c_ind=1;//contour index 每visit 一次++一次
 int block_index=0;
 double y_max=0,x_max=0;
+double area=0;
 string benchmark;
 string testcase;
 string nodespath;
 string tempe;
+string temp2;
 string netspath;
 char temp;
 char *tempstr=new char[100];
@@ -45,18 +47,18 @@ int main()
 
     cout<<"total number of testcases"<<endl;
     cin>>cases;
+    cout<<"step1:please input Benchmark name"<<endl;
+    cin>>benchmark;
     for(int i=0;i<cases;i++)
     {
-        cout<<"step1:please input Benchmark name"<<endl;
-        cin>>benchmark;
         cout<<"step2:please input testcase filename (without .nodes or .net)"<<endl;
         cin>>testcase;
         
         tempe="./"+benchmark;
-        benchmark=tempe+"/";
-        tempe=benchmark+testcase;
-        benchmark=tempe+"/";
-        tempe=benchmark+testcase;
+        temp2=tempe+"/";
+        tempe=temp2+testcase;
+        temp2=tempe+"/";
+        tempe=temp2+testcase;
         nodespath=tempe+".nodes";
         cout<<nodespath<<endl;
         
@@ -103,8 +105,7 @@ int main()
                 infile>>tempstr>>input_list[i].l_name>>input_list[i].r_name;
 
             }
-            //5/29
-            cout<<"successful2"<<endl;
+            
 
             //----------------------root information----------------------------------
             //root存在input_list[0]   ((其他nodes由lptr rptr 去走訪))
@@ -170,10 +171,13 @@ int main()
         c_ind=1;//建完contour index歸1
         //最後應該把所有vector free掉!!!
         block_index=0;
+      
     //b-----------------------------contour build--------------------------------
 
         //5/28 output (.m)
-        ofstream outfile ("test.m");
+        ofstream outfile ("fuck.m");
+            
+            outfile<<"figure(1)"<<endl;
             outfile<<"axis equal;"<<endl;
             outfile<<"hold on"<<endl;
             outfile<<"grid on"<<endl;
@@ -182,6 +186,7 @@ int main()
             outfile<<"block_y=[ 0 "<<y_max<<' '<<y_max<<" 0 0];"<<endl;//要改大小
             outfile<<"fill(block_x,block_y,'w','Edgecolor','r');"<<endl;
             outfile<<"% block location"<<endl;
+            //draw blocks
             for (int i = 0; i < nodes_num; i++)
             {
                 outfile<<"block_x=[ ";
@@ -201,7 +206,40 @@ int main()
                 outfile<<"text("<<tempx<<','<<tempy<<','<<'\''<<block_name[i]<<"\');"<<endl;
                       
             }
+            outfile<<"grid"<<endl;
             
+            //draw line
+            outfile<<"figure(2)"<<endl;
+            outfile<<"axis equal;"<<endl;
+            outfile<<"hold on"<<endl;
+            outfile<<"grid on"<<endl;
+            outfile<<"% area range"<<endl;
+            tourList.currentToFirst();
+            outfile<<"line([0 0],[0 "<<tourList.first->Yt<<"],'color','g')"<<endl;
+            for (Ynode* cur=tourList.first; cur!=NULL;   )
+            {   outfile<<"line(["<<cur->Xl<<' '<<cur->Xr<<"],["<<cur->Yt<<' '<<cur->Yt<<"],'color','g')"<<endl;
+                outfile<<"line(["<<cur->Xr<<' '<<cur->Xr<<"],["<<cur->Yt;
+                cur=cur->next;
+                outfile<<' '<<cur->Yt<<"],'color','g')"<<endl;
+                if(cur->Yt==0) break;
+            }
+            outfile<<"grid"<<endl;
+
+            tourList.currentToFirst();
+            //draw line end
+            /*
+            for (Ynode* cur=tourList.first; cur!=NULL; cur=cur->next)
+            {
+            cout<<'(';
+            cout<<cur->Xl<<' ';
+            cout<<cur->Xr<<' ';
+            cout<<cur->Yt;
+            cout<<')';
+            
+            }
+            */
+
+            area=y_max*x_max;//max區
             y_max=x_max=0;//initialized
             for(int i=0;i<nodes_num;i++)
             {block_x[i].clear();
@@ -211,7 +249,7 @@ int main()
             outfile.close();
             testcase=testcase+".m";
             const char* newname=testcase.c_str();
-            if(rename("test.m",newname)!=0)
+            if(rename("fuck.m",newname)!=0)
             cout<<"rename file error!\n";
 
             
@@ -565,7 +603,7 @@ void visit(Module*curM)//operation
     //leftest rightest 要變回null
 
     //testing
-    /*
+    
     for (Ynode* cur=tourList.first; cur!=NULL; cur=cur->next)
     {
     cout<<'(';
@@ -577,7 +615,7 @@ void visit(Module*curM)//operation
     }
     cout<<endl;
     //testing
-    */
+    
     c_ind++; 
     
 }
