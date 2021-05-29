@@ -6,20 +6,32 @@
 #include"Ychain.h"
 using namespace std;
 
+string stringname;
 int nodes_num=0;
 int nets_num=0;
+int cases=0;
+int c_ind=1;//contour index 每visit 一次++一次
+int block_index=0;
+double y_max=0,x_max=0;
+string benchmark;
+string testcase;
+string nodespath;
+string tempe;
+string netspath;
 char temp;
 char *tempstr=new char[100];
 char *allModules=new char[100];
 vector<Node> contour;
-int c_ind=1;//contour index 每visit 一次++一次
+vector<double> block_x[100];//每個block 的x
+vector<double> block_y[100];//每個block 的y
+vector<string> block_name;//1d
+//順序依照tree travers order
 Ychain tourList;
 ifstream infile;
 
 void inorder(Module*);//horse
 void visit(Module*);//operation
-void printName(Module*);//for testing use
- 
+void printName(Module*);//for testing use 
 void moveOn();
 
 int main()
@@ -27,143 +39,178 @@ int main()
     vector<Module> input_list;
     vector<int> nets[10];//2dimension
     input_list.clear();
-    infile.open("medium.nodes",ios::in);
     
-//t---------build Btree of nodes-----------------------------------------------
-    if(!infile)
-    {
-        cout<<"cannot open input file,break out";
-        exit(1);
-    }
-    else
-    {
-        //---------------get num of nodes-----------
-        moveOn();
-        infile>>nodes_num;
-        //-------------------------------------------
-        
-        Module tempNode;
-        input_list.resize(nodes_num);
-        //for (int i = 0; i < nodes_num; i++)
-        //{
-        //    input_list.push_back(tempNode);
-        //}
-        
 
-        for (int i = 0; i < nodes_num; i++)
+    cout<<"total number of testcases"<<endl;
+    cin>>cases;
+    for(int i=0;i<cases;i++)
+    {
+        cout<<"step1:please input Benchmark name"<<endl;
+        cin>>benchmark;
+        cout<<"step2:please input testcase filename (without .nodes or .net)"<<endl;
+        cin>>testcase;
+        
+        tempe="./"+benchmark;
+        benchmark=tempe+"/";
+        tempe=benchmark+testcase;
+        benchmark=tempe+"/";
+        tempe=benchmark+testcase;
+        nodespath=tempe+".nodes";
+        cout<<nodespath<<endl;
+        /*
+        tempe=".\\\\"+benchmark;
+        benchmark=tempe+"\\\\";
+        tempe=benchmark+testcase;
+        nodespath=tempe+".nodes";
+        cout<<nodespath<<endl;
+        */
+        infile.open(nodespath,ios::in);
+        
+    //t---------build Btree of nodes-----------------------------------------------
+        if(!infile)
         {
-            moveOn();
-            infile>>input_list[i].name;
-            moveOn();
-            infile>>input_list[i].width>>input_list[i].height;
-            moveOn();
-            infile>>tempstr>>input_list[i].l_name>>input_list[i].r_name;
-
+            cout<<"cannot open input file(maybe error relative path)";
+            cout<<nodespath<<endl;
+            cout<<netspath;
+            exit(1);
         }
-
-
-        //----------------------root information----------------------------------
-        //root存在input_list[0]   ((其他nodes由lptr rptr 去走訪))
-        //----------------------root information----------------------------------
-        
-        //root x cursor=0
-        input_list[0].x=0;
-
-        
-
-
-
-
-
-        bool r_status=0;
-        bool l_status=0;
-        //intialize right pointer
-        for (int j = 0; j < nodes_num; j++)
-        {   
+        else
+        {
+            //---------------get num of nodes-----------
+            moveOn();
+            infile>>nodes_num;
+            //block_x->clear();
+            //block_y->clear();
+            //block_x->reserve(nodes_num);
+            //block_y->reserve(nodes_num);
+            //5/29
+            cout<<"success1"<<endl;
+                
             
+            //-------------------------------------------
+            
+            Module tempNode;
+            input_list.resize(nodes_num);
+            //for (int i = 0; i < nodes_num; i++)
+            //{
+            //    input_list.push_back(tempNode);
+            //}
+            
+
             for (int i = 0; i < nodes_num; i++)
             {
-                if(strcmp(input_list[j].r_name,input_list[i].name)==0)
-                {   input_list[j].rightPtr=&input_list[i];
-                    r_status=1;
-                    //右有指成功
-                    //right child x cursor initialized*****************************************
-                    input_list[i].x=input_list[j].x;
+                moveOn();
+                infile>>input_list[i].name;
+                moveOn();
+                infile>>input_list[i].width>>input_list[i].height;
+                moveOn();
+                infile>>tempstr>>input_list[i].l_name>>input_list[i].r_name;
+
+            }
+            //5/29
+            cout<<"successful2"<<endl;
+
+            //----------------------root information----------------------------------
+            //root存在input_list[0]   ((其他nodes由lptr rptr 去走訪))
+            //----------------------root information----------------------------------
+            
+            //root x cursor=0
+            input_list[0].x=0;
+
+            bool r_status=0;
+            bool l_status=0;
+            //intialize right pointer
+            for (int j = 0; j < nodes_num; j++)
+            {   
+                
+                for (int i = 0; i < nodes_num; i++)
+                {
+                    if(strcmp(input_list[j].r_name,input_list[i].name)==0)
+                    {   input_list[j].rightPtr=&input_list[i];
+                        r_status=1;
+                        //右有指成功
+                        //right child x cursor initialized*****************************************
+                        input_list[i].x=input_list[j].x;
+                    }
+                    if(strcmp(input_list[j].l_name,input_list[i].name)==0)
+                    {   input_list[j].leftPtr=&input_list[i];
+                        l_status=1;
+                        //左有指成功
+                        //left child x cursor initialized*******************************************
+                        input_list[i].x=input_list[j].x+input_list[j].width;
+                    }  
                 }
-                if(strcmp(input_list[j].l_name,input_list[i].name)==0)
-                {   input_list[j].leftPtr=&input_list[i];
-                    l_status=1;
-                    //左有指成功
-                    //left child x cursor initialized*******************************************
-                    input_list[i].x=input_list[j].x+input_list[j].width;
-                }  
+                
+                if(r_status==0) input_list[j].rightPtr=NULL;
+                if(l_status==0) input_list[j].leftPtr=NULL;
+            
+                r_status=0;
+                l_status=0;
+            }
+
+
+    //t-----------------------------contour build--------------------------------
+        contour.resize(nodes_num*2);
+        //test
+        //cout<<"contour.size()"<<contour.size()<<endl;
+        contour[0].Xl=0;
+        contour[0].Xr=100000;
+        contour[0].Yt=0;
+        contour[0].next=NULL;
+        contour[0].previous=NULL;
+        tourList.create1(&contour[0]);//first=current=&contour[0]
+
+        //inorder function
+        inorder(&input_list[0]);
+        //最後一個visit沒有出來
+        
+        
+        //結尾
+        c_ind=1;//建完contour index歸1
+        //最後應該把所有vector free掉!!!
+        block_index=0;
+    //b-----------------------------contour build--------------------------------
+
+        //5/28 output (.m)
+        cout<<"success3";
+        ofstream outfile ("test.m");
+            outfile<<"axis equal;"<<endl;
+            outfile<<"hold on"<<endl;
+            outfile<<"grid on"<<endl;
+            outfile<<"% area range"<<endl;
+            outfile<<"block_x=[ 0 0 "<<x_max<<' '<<x_max<<" 0];"<<endl;//要改大小
+            outfile<<"block_y=[ 0 "<<y_max<<' '<<y_max<<" 0 0];"<<endl;//要改大小
+            outfile<<"fill(block_x,block_y,'w','Edgecolor','r');"<<endl;
+            outfile<<"% block location"<<endl;
+            for (int i = 0; i < nodes_num; i++)
+            {
+                outfile<<"block_x=[ ";
+                for (int j = 0; j < 5; j++)
+                {outfile<<block_x[i][j]<<' ';}
+                outfile<<"];"<<endl;
+                outfile<<"block_y=[ ";
+                for (int j = 0; j < 5; j++)
+                {outfile<<block_y[i][j]<<' ';}
+                outfile<<"];"<<endl;
+                outfile<<"fill(block_x,block_y,'c');"<<endl;
+                int tempx=0,tempy=0;
+                tempx=(block_x[i][2]+block_x[i][0])/2;
+                tempy=(block_y[i][2]+block_y[i][0])/2;
+                cout<<tempx;
+                cout<<tempy<<endl;
+                outfile<<"text("<<tempx<<','<<tempy<<','<<'\''<<block_name[i]<<"\');"<<endl;
+                      
             }
             
-            if(r_status==0) input_list[j].rightPtr=NULL;
-            if(l_status==0) input_list[j].leftPtr=NULL;
-        
-            r_status=0;
-            l_status=0;
+            y_max=x_max=0;//initialized
+            infile.close();
+            outfile.close();
+            testcase=testcase+".m";
+            const char* newname=testcase.c_str();
+            if(rename("test.m",newname)!=0)
+            cout<<"rename file error!\n";
+
         }
-
-        
-        //好像不需要了
-        //第一層 height initialized-------------------------------------------
-        //Module * currentPtr=&input_list[0];
-        //for (;currentPtr=NULL;currentPtr=currentPtr->leftPtr)
-        //{
-        //    currentPtr->y=currentPtr->height;
-        //}
-        //第一層 height initialized-------------------------------------------
-        
-        /*
-        cout<<input_list[0].name<<endl;
-        cout<<input_list[0].height<<endl;
-        cout<<input_list[0].l_name<<endl;
-        cout<<input_list[0].r_name<<endl;
-        cout<<input_list[0].width<<endl;
-        cout<<input_list[0].width<<endl;
-        cout<<input_list[0].x<<endl;
-        cout<<input_list[0].y<<endl;
-
-        cout<<input_list[0].leftPtr->name<<"fuck20201"<<endl;
-        cout<<input_list[0].leftPtr->leftPtr->name<<"fuck20201"<<endl;
-        cout<<input_list[0].leftPtr->y<<"fuck20201"<<endl;
-        cout<<input_list[0].leftPtr->leftPtr->height<<endl;
-        cout<<input_list[0].leftPtr->leftPtr->y<<"fuck20201"<<endl;
-        inorder(&input_list[0]);
-        */
-        
-
-//t-----------------------------contour build--------------------------------
-    contour.resize(nodes_num*2);
-    //test
-    //cout<<"contour.size()"<<contour.size()<<endl;
-    contour[0].Xl=0;
-    contour[0].Xr=100000;
-    contour[0].Yt=0;
-    contour[0].next=NULL;
-    contour[0].previous=NULL;
-    tourList.create1(&contour[0]);//first=current=&contour[0]
-
-    //inorder function
-    inorder(&input_list[0]);
-    //最後一個visit沒有出來
-    
-    
-    //結尾
-    c_ind=1;//建完contour index歸1
-    //最後應該把所有vector free掉!!!
-//b-----------------------------contour build--------------------------------
-
-
-
-
-        
-        
-        
-
-        infile.close();
     }
 //b---------build Btree of nodes-----------------------------------------------
 
@@ -197,8 +244,6 @@ int main()
     }
     */
 
-
-
     
     delete [] tempstr;
     system("PAUSE");
@@ -223,8 +268,7 @@ void moveOn()
 void inorder(Module* currentNode)
 {
     if(currentNode)
-    {
-    //printName(currentNode);   
+    {  
     visit(currentNode);
     inorder(currentNode->leftPtr);
     inorder(currentNode->rightPtr);
@@ -486,8 +530,30 @@ void visit(Module*curM)//operation
             }
         }  
     }  
-    
+    cout<<"aaaaa"<<endl;
     tourList.currentToFirst();
+    
+    //build blockxy  name
+    block_x[block_index].push_back(curM->x);
+    block_x[block_index].push_back(curM->x);
+    block_x[block_index].push_back(curM->x+curM->width);
+    block_x[block_index].push_back(curM->x+curM->width);
+    block_x[block_index].push_back(curM->x);
+    
+    block_y[block_index].push_back(curM->y);
+    block_y[block_index].push_back(curM->y+curM->height);
+    block_y[block_index].push_back(curM->y+curM->height);
+    block_y[block_index].push_back(curM->y);
+    block_y[block_index].push_back(curM->y);
+    
+    
+    stringname=curM->name;
+    cout<<stringname;
+    block_name.push_back(stringname);
+    block_index++;
+    
+    if((curM->y+curM->height)>y_max) y_max=curM->y+curM->height;
+    if((curM->x+curM->width)>x_max) x_max=curM->x+curM->width;
     //leftest rightest 要變回null
 
     //testing
@@ -505,6 +571,7 @@ void visit(Module*curM)//operation
     //testing
     */
     c_ind++; 
+    
 }
 
 
