@@ -15,6 +15,8 @@ int block_index=0;
 double y_max=0,x_max=0;
 double area=0;
 double totallength=0;
+double min_pin_x=100000,max_pin_x=0;
+double min_pin_y=100000,max_pin_y=0;
 string benchmark;
 string testcase;
 string nodespath;
@@ -263,27 +265,70 @@ int main()
             tourList.currentToFirst();
             //draw line end
             
-            //repot calculation
+            //report calculation
             area=y_max*x_max;//max區
+            //vector<Module> input_list; nodes_num
+            
+            cout<<"nets number"<<nets_num<<endl;
+            for (int i = 0; i < nets_num; i++)
+            {
+                for (int j = 0; j <nets_list[i].size(); j++)//一條nets 完成
+                {
+                    for (int m = 0; m < nodes_num; m++)
+                    {   
+                        string compare(input_list[m].name);
+                        if(nets_list[i][j]==compare)    
+                        {
+                            input_list[m].pin_x=input_list[m].x+(input_list[m].width/2);
+                            if(input_list[m].pin_x>max_pin_x) max_pin_x=input_list[m].pin_x;
+                            if(input_list[m].pin_x<min_pin_x) min_pin_x=input_list[m].pin_x;
+                            input_list[m].pin_y=input_list[m].y+(input_list[m].height/2);
+                            if(input_list[m].pin_y>max_pin_y) max_pin_y=input_list[m].pin_y;
+                            if(input_list[m].pin_y<min_pin_y) min_pin_y=input_list[m].pin_y;
+                        }
+                    }
+                    
+                }
+                totallength=totallength+(max_pin_x-min_pin_x)+(max_pin_y-min_pin_y);
+                cout<<"totallenth"<<totallength<<endl;
+
+                min_pin_x=100000,max_pin_x=0;//initialized
+                min_pin_y=100000,max_pin_y=0;//initialized
+                
+            }
+            
             
             ofstream outfile2("reporttt.txt");
             outfile2<<"Benchmark:"<<testcase<<endl;
-            outfile<<"Area"<<area<<endl;
+            outfile2<<"Area"<<area<<endl;
+            outfile2<<"wirelength"<<totallength<<endl;
+
+            outfile2.close();
+            string nametemp;
+            nametemp=testcase+".txt";
+            const char* newname;
+            newname=nametemp.c_str();
+            if(rename("reporttt.txt",newname)!=0)
+            cout<<"rename report error!\n";  
+            
 
 
 
             y_max=x_max=0;//initialized
+            totallength=0;
             for(int i=0;i<nodes_num;i++)
             {block_x[i].clear();
             block_y[i].clear();
             block_name.clear();}
+            min_pin_x=100000,max_pin_x=0;//initialized
+            min_pin_y=100000,max_pin_y=0;//initialized
             infile.close();
-            outfile.close();
             infile2.close();
+            outfile.close();
             testcase=testcase+".m";
-            const char* newname=testcase.c_str();
+            newname=testcase.c_str();
             if(rename("fuck.m",newname)!=0)
-            cout<<"rename file error!\n";
+            cout<<"rename .mfile error!\n";
 
             
 
