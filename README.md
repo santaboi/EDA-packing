@@ -8,6 +8,12 @@
 **report.txt**
 ![](image/report.png)
 
+## sample input
+**nodes**
+![](image/nodes.png)
+**nets**
+![](image/nets.png)
+
 ## details
 此程式read module(.nets .nodes)file後
 用binary tree 儲存各個module的相對位置關係
