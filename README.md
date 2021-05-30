@@ -5,6 +5,8 @@
 ## sample output
 **graph on matlab**
 ![](image/graph.png)
+**report.txt**
+![](image/report.png)
 
 ## details
 此程式read module(.nets .nodes)file後
