@@ -14,22 +14,28 @@ int c_ind=1;//contour index 每visit 一次++一次
 int block_index=0;
 double y_max=0,x_max=0;
 double area=0;
+double totallength=0;
 string benchmark;
 string testcase;
 string nodespath;
 string tempe;
 string temp2;
 string netspath;
+string netsnodes;
 char temp;
+char temp3;
+char tem3[100];
 char *tempstr=new char[100];
 char *allModules=new char[100];
 vector<Node> contour;
 vector<double> block_x[100];//每個block 的x
 vector<double> block_y[100];//每個block 的y
 vector<string> block_name;//1d
+vector<string> nets_list[100];
 //順序依照tree travers order
 Ychain tourList;
 ifstream infile;
+ifstream infile2;
 
 void inorder(Module*);//horse
 void visit(Module*);//operation
@@ -37,6 +43,7 @@ void inorder_X(Module*);
 void create_x(Module*); 
 void printName(Module*);//for testing use
 void moveOn();
+void moveon2();
 
 int main()
 {
@@ -60,16 +67,16 @@ int main()
         temp2=tempe+"/";
         tempe=temp2+testcase;
         nodespath=tempe+".nodes";
-        cout<<nodespath<<endl;
-        
+        netspath=tempe+".nets";
         infile.open(nodespath,ios::in);
+        infile2.open(netspath,ios::in);
         
     //t---------build Btree of nodes-----------------------------------------------
-        if(!infile)
+        if(!infile&&!infile2)
         {
-            cout<<"cannot open input file(maybe error relative path)";
-            cout<<nodespath<<endl;
-            cout<<netspath;
+            cout<<"cannot open input file(maybe error relative path)"<<endl;
+            cout<<"nodespath:"<<nodespath<<endl;
+            cout<<"netspath:"<<netspath;
             exit(1);
         }
         else
@@ -77,12 +84,13 @@ int main()
             //---------------get num of nodes-----------
             moveOn();
             infile>>nodes_num;
+            moveon2();
+            infile2>>nets_num;
             //block_x->clear();
             //block_y->clear();
             //block_x->reserve(nodes_num);
             //block_y->reserve(nodes_num);
-            //5/29
-            cout<<"success1"<<endl;
+            
                 
             
             //-------------------------------------------
@@ -94,7 +102,7 @@ int main()
             //    input_list.push_back(tempNode);
             //}
             
-
+            //get nodes
             for (int i = 0; i < nodes_num; i++)
             {
                 moveOn();
@@ -105,11 +113,38 @@ int main()
                 infile>>tempstr>>input_list[i].l_name>>input_list[i].r_name;
 
             }
-            
+            //getnodes end
 
-            //----------------------root information----------------------------------
-            //root存在input_list[0]   ((其他nodes由lptr rptr 去走訪))
-            //----------------------root information----------------------------------
+            //getents
+            //infile2.getline(tem3,100);
+            infile2>>std::ws;
+            for (int i = 0; i < nets_num; i++)
+            {
+                infile2.getline(tem3,100);//netsname useless
+                infile2>>std::ws;
+                infile2.getline(tem3,100);//netsnodes useful
+                
+                string str(tem3);
+                string delimiter = " ";
+                size_t pos = 0;
+                string token;
+                nets_list[i].clear();
+                while ((pos = str.find(delimiter)) != std::string::npos) 
+                {
+                token = str.substr(0, pos);
+                //std::cout << token << std::endl;
+                if(token!=" ")  nets_list[i].push_back(token);
+                str.erase(0, pos + delimiter.length());
+                }
+                //std::cout << str<< std::endl;
+                nets_list[i].push_back(str);
+
+                cout<<"nets"<<i<<endl;
+                for(int j=0;j<nets_list[i].size();j++)
+                cout<<" "<<nets_list[i][j];
+                cout<<endl;
+            }
+            //getnets end
             
             //root x cursor=0
             input_list[0].x=0;
@@ -227,19 +262,16 @@ int main()
 
             tourList.currentToFirst();
             //draw line end
-            /*
-            for (Ynode* cur=tourList.first; cur!=NULL; cur=cur->next)
-            {
-            cout<<'(';
-            cout<<cur->Xl<<' ';
-            cout<<cur->Xr<<' ';
-            cout<<cur->Yt;
-            cout<<')';
             
-            }
-            */
-
+            //repot calculation
             area=y_max*x_max;//max區
+            
+            ofstream outfile2("reporttt.txt");
+            outfile2<<"Benchmark:"<<testcase<<endl;
+            outfile<<"Area"<<area<<endl;
+
+
+
             y_max=x_max=0;//initialized
             for(int i=0;i<nodes_num;i++)
             {block_x[i].clear();
@@ -247,6 +279,7 @@ int main()
             block_name.clear();}
             infile.close();
             outfile.close();
+            infile2.close();
             testcase=testcase+".m";
             const char* newname=testcase.c_str();
             if(rename("fuck.m",newname)!=0)
@@ -259,34 +292,7 @@ int main()
 //b---------build Btree of nodes-----------------------------------------------
 
 
-    /*
-    infile.open("simple.nets",ios::in);
-
-    if(!infile)
-    {
-        cout<<"cannot open input file,break out";
-        exit(1);
-    }
-    else
-    {
-        moveOn();
-        infile>>nets_num;
-
-        nets->resize(nets_num);
-        for (int i = 0; i < nets_num; i++)
-        {    nets[i].clear();}
-        
-        for (int i = 0; i < nets_num; i++)
-        {
-            infile>>tempstr;//存NETn 文字
-            infile.getline(allModules);
-            
-        }
-        
-        
-        infile.close();
-    }
-    */
+    
 
     
     delete [] tempstr;
@@ -304,6 +310,18 @@ void moveOn()
         infile.get(temp);
         if(temp==':')
         {   infile.get(temp);//get space 
+            break;
+        }
+    }
+}
+
+void moveon2()
+{
+    while (1)
+    {
+        infile2.get(temp3);
+        if(temp3==':')
+        {   infile2.get(temp3);//get space 
             break;
         }
     }

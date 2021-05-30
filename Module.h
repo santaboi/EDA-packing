@@ -15,6 +15,8 @@ public:
     double y;//module 下底的y
     double width;
     double height;
+    double pin_x;
+    double pin_y;
     Module *leftPtr;
     Module *rightPtr;
     /*Module();//default ctor

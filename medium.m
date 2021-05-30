@@ -1,3 +1,4 @@
+figure(1)
 axis equal;
 hold on
 grid on
@@ -70,3 +71,21 @@ block_x=[ 0 0 30 30 0 ];
 block_y=[ 90 100 100 90 90 ];
 fill(block_x,block_y,'c');
 text(15,95,'m16');
+grid
+figure(2)
+axis equal;
+hold on
+grid on
+% area range
+line([0 0],[0 100],'color','g')
+line([0 30],[100 100],'color','g')
+line([30 30],[100 88],'color','g')
+line([30 32],[88 88],'color','g')
+line([32 32],[88 80],'color','g')
+line([32 48],[80 80],'color','g')
+line([48 48],[80 70],'color','g')
+line([48 64],[70 70],'color','g')
+line([64 64],[70 54],'color','g')
+line([64 78],[54 54],'color','g')
+line([78 78],[54 0],'color','g')
+grid
