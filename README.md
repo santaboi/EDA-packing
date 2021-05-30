@@ -1,6 +1,6 @@
 # EDA-packing
 ## intorduction
-**this program help packing modules within a chip,by calculating its min area ,min wirelength,and also draw out module display and the contour**
+**this program help packing modules within a chip by calculating its min area ,min wirelength.Besides,module display and the contour is generated in .m file**
 
 ## sample output
 **graph on matlab**
