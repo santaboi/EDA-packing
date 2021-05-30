@@ -2,6 +2,10 @@
 ## intorduction
 **this program help packing modules within a chip,by calculating its min area ,min wirelength,and also draw out module display and the contour**
 
+## sample output
+**graph on matlab**
+![](image/-github-graph.png)
+
 ## details
 此程式read module(.nets .nodes)file後
 用binary tree 儲存各個module的相對位置關係
