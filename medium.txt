@@ -1,3 +1,0 @@
-Benchmark:medium
-Area7800
-wirelength1078
