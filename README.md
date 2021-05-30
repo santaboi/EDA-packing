@@ -4,7 +4,7 @@
 
 ## sample output
 **graph on matlab**
-![](image/-github-graph.png)
+![](image/graph.png)
 
 ## details
 此程式read module(.nets .nodes)file後
