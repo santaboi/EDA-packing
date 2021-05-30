@@ -1,3 +1,0 @@
-Benchmark:apte
-Area4.78576e+007
-wirelength215454
