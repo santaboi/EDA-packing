@@ -1,7 +1,16 @@
 # EDA-packing
-程式碼放在benchmark1外面
+##intorduction
+**this program help packing modules within a chip，by calculating its min area ,min wirelength,and also draw out module display and the contour**
 
-程式說明
+#details
+此程式read module(.nets .nodes)file後
+用binary tree 儲存各個module的相對位置關係
+用inorder traversal的方式建立整個chip graph
+含有所有的module(在matlab中畫出)
+用doubly linked list 去建立contour
+
+
+##使用說明
 會先問有幾個case要測
 testcases 的資料放在benchmark1裡面就好(testcases資料夾與.nets ,nodes檔案名稱相同)
 請輸入benchmark 資料夾的名子 (ex:這邊是benchmark1)
